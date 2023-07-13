@@ -1,5 +1,5 @@
 var express = require('express');
-const { pedirTodas, pedir } = require('../db/pedidos');
+const { pedirTodas, pedir, crear, actualizar } = require('../db/pedidos');
 var router = express.Router();
 const { body, validationResult } = require('express-validator');
 
@@ -76,23 +76,38 @@ function(req, res, next) {
     return next(err);
   }
   res.send(meta);
- })
+ });
 });
 
 /* PUT Actualizar meta */
-router.put('/:id', function(req, res, next) {
- 
-  const meta = req.body;
-  const id = req.params.id;
-  if (meta.id !== id)  {
-    return res.sendStatus(409);
-  }
-  const indice = metas.findIndex(item => item.id === id);
-  if (indice === -1) {
-    return res.sendStatus(404);
-  }
-  metas[indice] = meta;
-  res.send(meta);
+router.put('/:id',
+  body('detalles').isLength({ min: 5}),
+  body('periodo').not().isEmpty(),
+  function(req, res, next) {
+    const  errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const body = req.body;
+    const id = req.params.id;
+    if (body.id !== +id) {
+      return res.sendStatus(409);
+    }
+    pedir('metas', id,  (err, meta) => {
+      if (err) {
+        return next(err);
+      }
+      if (!meta.lenght) {
+        return  res.sendStatus(404);
+      }
+      actualizar('metas', id, body, (err, actualizada) => {
+        if (err) {
+          return next(err);
+        }
+        res.send(actualizada);
+      });
+    });
+   
 });
 
 /* DELETE Borrar meta */

@@ -27,7 +27,7 @@ function crear(tabla, item, callback) {
     const valores = keys.map(key => `'${item[key]}'`).join(', ');
 
     db.any(`INSERT INTO ${tabla} (${propiedades}) VALUES(${valores}) returning *`)
-       .then(([resultado]) => {
+        .then(([resultado]) => {
         callback(null, resultado);
        })
        .catch(error => {
@@ -35,9 +35,24 @@ function crear(tabla, item, callback) {
        });
 }
 
+function actualizar(tabla, id, item, callback) {
+    const keys = Object.keys(item);
+    const actualizaciones = keys.map(key => `${key} = '${item[key]}'`).join(', ');
+
+    const sql = `UPTADE ${tabla} SET ${actualizaciones} WHERE id = ${id} returning *`;
+    db.any(sql)
+    .then(([resultado]) => {
+        callback(null, resultado);
+    })
+    .catch(error => {
+        callback(error);
+    });
+}
+
 
 module.exports = {
     pedirTodas,
     pedir,
-    crear
+    crear,
+    actualizar
 };
