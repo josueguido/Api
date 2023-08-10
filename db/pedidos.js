@@ -1,8 +1,18 @@
 const db = require('./configuracion');
 
 
-function pedirTodas(tabla, callback) {
-    db.any(`SELECT * FROM ${tabla}`)
+function pedirTodas(tabla, cuenta_id,  callback) {
+    db.any(`SELECT * FROM ${tabla} WHERE cuenta_id = ${cuenta_id}`)
+    .then(resultado => {
+        callback(null, resultado);
+    })
+    .catch(error => {
+        callback(error);
+    });
+}
+
+function pedirCuenta(usuario, callback) {
+    db.any(`SELECT * FROM cuentas WHERE usuario = '${usuario}'`)
     .then(resultado => {
         callback(null, resultado);
     })
@@ -39,7 +49,7 @@ function actualizar(tabla, id, item, callback) {
     const keys = Object.keys(item);
     const actualizaciones = keys.map(key => `${key} = '${item[key]}'`).join(', ');
 
-    const sql = `UPTADE ${tabla} SET ${actualizaciones} WHERE id = ${id} returning *`;
+    const sql = `UPDATE ${tabla} SET ${actualizaciones} WHERE id = ${id} returning *`;
     db.any(sql)
     .then(([resultado]) => {
         callback(null, resultado);
@@ -50,9 +60,22 @@ function actualizar(tabla, id, item, callback) {
 }
 
 
+function borrar(tabla, id, callback) {
+    db.any(`DELETE FROM ${tabla} WHERE id=${id}`)
+    .then(() => {
+        callback(null);
+    })
+    .catch(error => {
+        callback(error);
+    });
+
+}
+    
 module.exports = {
     pedirTodas,
     pedir,
     crear,
-    actualizar
+    actualizar,
+    borrar,
+    pedirCuenta
 };

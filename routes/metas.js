@@ -1,5 +1,5 @@
 var express = require('express');
-const { pedirTodas, pedir, crear, actualizar } = require('../db/pedidos');
+const { pedirTodas, pedir, crear, actualizar, borrar } = require('../db/pedidos');
 var router = express.Router();
 const { body, validationResult } = require('express-validator');
 
@@ -38,11 +38,10 @@ let metas = [
 
 /* GET Lista de Metas */
 router.get('/', function(req, res, next) {
-  pedirTodas('metas', (err, metas) => {
+  pedirTodas('metas',  req.user.id,  (err, metas) => {
     if (err) {
       return next(err);
     }
-    console.log(metas)
     res.send(metas);
   });
 });
@@ -54,7 +53,7 @@ router.get('/:id', function(req, res, next) {
     if (err) {
       return next(err);
     }
-    if (!meta.lenght) {
+    if (!meta.length) {
        return res.sendStatus(404);
     }
   res.send(meta[0]);
@@ -90,7 +89,7 @@ router.put('/:id',
     }
     const body = req.body;
     const id = req.params.id;
-    if (body.id !== +id) {
+    if (body.id != id) {
       return res.sendStatus(409);
     }
     pedir('metas', id,  (err, meta) => {
@@ -113,12 +112,20 @@ router.put('/:id',
 /* DELETE Borrar meta */
 router.delete('/:id', function(req, res, next) {
   const id = req.params.id;
-  const indice = metas.findIndex(item => item.id === id);
-  if (indice === -1) {
-    return res.sendStatus(404);
-  }
-   metas.splice(indice, 1);
-   res.sendStatus(204);
+  pedir('metas', id, (err, meta) => {
+    if (err) {
+      return next(err);
+    }
+    if (!meta.length) {
+      return res.sendStatus(404);
+    }
+    borrar('metas', id, (err) => {
+      if (err) {
+      return next(err);
+      }
+      res.sendStatus(204);
+    });
+  });
 });
 
 
