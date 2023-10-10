@@ -3,42 +3,11 @@ const { pedirTodas, pedir, crear, actualizar, borrar } = require('../db/pedidos'
 var router = express.Router();
 const { body, validationResult } = require('express-validator');
 
-let metas = [
-  {
-    "id":"1",
-    "detalles":"Correr por 30 minutos",
-    "periodos":"dia",
-    "eventos":1,
-    "icono":"🏃‍♂️",
-    "meta":365,
-    "plazo":"2030/01/01",
-    "completado":100
-},
-{
-    "id":"2",
-    "detalles":"Leer un libro",
-    "periodo":"año",
-    "eventos":6,
-    "icono":"📚",
-    "meta":12,
-    "plazo":"2030/01/01",
-    "completado":0
-},
-{
-    "id":"3",
-    "detalles":"Viajar a parques nacionales",
-    "plazo":"mes",
-    "frecuencia":1,
-    "icono":"⛰️",
-    "meta":60,
-    "fecha_limite":"2030/01/01",
-    "completado":5
-}
-];
+
 
 /* GET Lista de Metas */
 router.get('/', function(req, res, next) {
-  pedirTodas('metas',  req.user.id,  (err, metas) => {
+  pedirTodas('metas',  req.auth.id ,  (err, metas) => {
     if (err) {
       return next(err);
     }
@@ -96,7 +65,7 @@ router.put('/:id',
       if (err) {
         return next(err);
       }
-      if (!meta.lenght) {
+      if (!meta.length) {
         return  res.sendStatus(404);
       }
       actualizar('metas', id, body, (err, actualizada) => {

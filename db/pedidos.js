@@ -11,6 +11,8 @@ function pedirTodas(tabla, cuenta_id,  callback) {
     });
 }
 
+
+
 function pedirCuenta(usuario, callback) {
     db.any(`SELECT * FROM cuentas WHERE usuario = '${usuario}'`)
     .then(resultado => {
